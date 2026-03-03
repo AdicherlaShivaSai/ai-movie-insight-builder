@@ -17,7 +17,7 @@ export async function GET(request: Request) {
       );
     }
 
-    // 1️⃣ Convert IMDb → TMDB
+    // Convert IMDb → TMDB
     const movie = await getMovieByImdbId(imdbId);
 
     if (!movie) {
@@ -27,7 +27,7 @@ export async function GET(request: Request) {
       );
     }
 
-    // 2️⃣ Get details + cast
+    // Get details + cast
     const details = await getMovieDetails(movie.id);
     const credits = await getMovieCredits(movie.id);
 

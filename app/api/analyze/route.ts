@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
     const aiResponse = await analyzeReviews(reviews);
 
-    // 🧠 Parse AI response safely
+    // Parse AI response safely
     let parsedResult;
 
     try {

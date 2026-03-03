@@ -1,24 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import MovieCard from "@/components/MovieCard";
+import SentimentCard from "@/components/SentimentCard";
+import Loader from "@/components/Loader";
+import { MovieData } from "@/types/movie";
+import { AIResult } from "@/types/ai";
 
-interface MovieData {
-  title: string;
-  poster: string;
-  releaseYear: string;
-  rating: number;
-  plot: string;
-  cast: {
-    name: string;
-    character: string;
-  }[];
-}
-
-interface AIResult {
-  summary: string;
-  sentiment: "Positive" | "Mixed" | "Negative";
-}
 
 export default function Home() {
   const [imdbId, setImdbId] = useState("");
@@ -52,7 +40,7 @@ export default function Home() {
       setMovie(null);
       setAiResult(null);
 
-      // 1️⃣ Fetch movie details
+      // Fetch movie details
       const movieRes = await fetch(`/api/movie?imdbId=${imdbId}`);
       const movieData = await movieRes.json();
 
@@ -60,13 +48,13 @@ export default function Home() {
 
       setMovie(movieData);
 
-      // 2️⃣ Fetch reviews
+      // Fetch reviews
       const reviewsRes = await fetch(`/api/reviews?imdbId=${imdbId}`);
       const reviewsData = await reviewsRes.json();
 
       if (!reviewsRes.ok) throw new Error(reviewsData.error);
 
-      // 3️⃣ Analyze reviews
+      // Analyze reviews
       const analyzeRes = await fetch("/api/analyze", {
         method: "POST",
         headers: {
@@ -117,11 +105,7 @@ export default function Home() {
           </div>
         )}
 
-        {loading && (
-          <div className="text-center py-6 animate-pulse">
-            <p className="text-gray-400">Analyzing movie with AI...</p>
-          </div>
-        )}
+        {loading && <Loader />}
 
         {error && (
           <div className="bg-red-900 border border-red-700 text-red-300 p-3 rounded mb-4 text-center">
@@ -129,61 +113,9 @@ export default function Home() {
           </div>
         )}
 
-        {movie && (
-          <motion.div
-            key={movie.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="bg-gray-800 p-6 rounded mb-6"
-          >
-            <div className="flex flex-col md:flex-row gap-6">
-              <img
-                src={movie.poster}
-                alt={movie.title}
-                className="w-40 rounded"
-              />
-              <div>
-                <h2 className="text-2xl font-semibold">{movie.title}</h2>
-                <p>Year: {movie.releaseYear}</p>
-                <p>Rating: ⭐ {movie.rating}</p>
-                <p className="mt-3 text-gray-300">{movie.plot}</p>
+        {movie && <MovieCard movie={movie} />}
 
-                <div className="mt-4">
-                  <h3 className="font-semibold">Top Cast:</h3>
-                  <ul className="text-gray-300">
-                    {movie.cast.map((actor, index) => (
-                      <li key={index}>
-                        {actor.name} as {actor.character}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {aiResult && (
-          <div className="bg-gray-800 p-6 rounded mt-6">
-            <div className="flex items-center gap-3 mb-4">
-              <h3 className="text-xl font-semibold">Audience Sentiment:</h3>
-              <span
-                className={`px-3 py-1 rounded text-sm ${
-                  aiResult.sentiment === "Positive"
-                    ? "bg-green-600"
-                    : aiResult.sentiment === "Mixed"
-                      ? "bg-yellow-600"
-                      : "bg-red-600"
-                }`}
-              >
-                {aiResult.sentiment}
-              </span>
-            </div>
-
-            <p className="text-gray-300 leading-relaxed">{aiResult.summary}</p>
-          </div>
-        )}
+        {aiResult && <SentimentCard result={aiResult} />}
       </div>
     </main>
   );
